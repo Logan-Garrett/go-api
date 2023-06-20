@@ -41,6 +41,7 @@ func getDummyById(id string) (*dummy, error) {
 			return &dummys[i], nil
 		}
 	}
+
 	return nil, errors.New("Dummy Not Found")
 }
 
@@ -56,10 +57,24 @@ func getDummy(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, dummy)
 }
 
+func modifyDummy(context *gin.Context) {
+	id := context.Param("id")
+	dummy, err := getDummyById(id)
+
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Dummy Not Found."})
+		return
+	}
+
+	dummy.Good = !dummy.Good
+	context.IndentedJSON(http.StatusOK, dummy)
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/dummys", getDummys)
 	router.GET("/dummys/:id", getDummy)
+	router.PATCH("/dummys/:id", modifyDummy)
 	router.POST("/dummys", addDummy)
 	router.Run("localhost:9090")
 }
