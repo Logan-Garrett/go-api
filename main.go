@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -34,9 +35,31 @@ func addDummy(context *gin.Context) {
 	context.IndentedJSON(http.StatusCreated, newDummy)
 }
 
+func getDummyById(id string) (*dummy, error) {
+	for i, d := range dummys {
+		if d.ID == id {
+			return &dummys[i], nil
+		}
+	}
+	return nil, errors.New("Dummy Not Found")
+}
+
+func getDummy(context *gin.Context) {
+	id := context.Param("id")
+	dummy, err := getDummyById(id)
+
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Dummy Not Found."})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, dummy)
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/dummys", getDummys)
+	router.GET("/dummys/:id", getDummy)
 	router.POST("/dummys", addDummy)
 	router.Run("localhost:9090")
 }
