@@ -23,8 +23,20 @@ func getDummys(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, dummys)
 }
 
+func addDummy(context *gin.Context) {
+	var newDummy dummy
+
+	if err := context.BindJSON(&newDummy); err != nil {
+		return
+	}
+
+	dummys = append(dummys, newDummy)
+	context.IndentedJSON(http.StatusCreated, newDummy)
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/dummys", getDummys)
+	router.POST("/dummys", addDummy)
 	router.Run("localhost:9090")
 }
